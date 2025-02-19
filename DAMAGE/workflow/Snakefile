@@ -1,0 +1,65 @@
+import os
+import sys
+import pandas as pd
+
+BASE_PATH = os.path.dirname(os.path.abspath(workflow.snakefile))
+configfile: os.path.join(BASE_PATH, "config", "config.yaml")
+
+# Read metadata
+clusters_metadata = pd.read_csv(os.path.join(config["input"], "thresher", "output", "clusters_summary.csv"))
+clusters_list = list(clusters_metadata["cluster"])
+
+if len(clusters_list) == 0:
+    sys.exit("No clusters found. Exiting...")
+
+rule all:
+    input:
+        # Cluster Alleles 
+        expand(os.path.join(config["output"], "cluster_alleles", "traits", "whatsgnu_traits_cluster{cluster}.csv"), cluster=clusters_list),
+        expand(os.path.join(config["output"], "cluster_alleles", "scoring", "cluster{cluster}_alleles_scoring.csv"), cluster=clusters_list),
+        os.path.join(config["output"], "cluster_alleles", "cluster_alleles_summary.RDS"),
+        os.path.join(config["output"], "cluster_alleles", "Cluster_ortholog_alleles.pdf"),
+        os.path.join(config["output"], "cluster_alleles", "unique_alleles_groups.RDS"),
+        os.path.join(config["output"], "cluster_alleles", "fasta" ,"unique_alleles_fasta.RDS"),
+        # Mafft
+        os.path.join(config["output"], "mafft", "scripts", "mafft_cmd_path.txt"),
+        os.path.join(config["output"], "mafft", "msa","msa_path.txt"),
+        os.path.join(config["output"], "mafft", "msa","msa_target.RDS"),
+        # Primer3
+        os.path.join(config["output"], "primer3", "input", "primer3_input.RDS"),
+        os.path.join(config["output"], "primer3", "scripts", "primer3_cmd_path.txt"),
+        os.path.join(config["output"], "primer3", "output","primer3_output_path.txt"),
+        os.path.join(config["output"], "primer3", "output", "primer3_primers.RDS"),
+        # Ipcress
+        os.path.join(config["output"], "ipcress", "scripts", "ipcress_cmd_path.txt"),
+        os.path.join(config["output"], "ipcress", "output", "ipcress_output_path.txt"),
+        os.path.join(config["output"], "primer3", "output", "primer3_qc.RDS"),
+        os.path.join(config["output"], "primer3", "primers_list.csv"),
+        os.path.join(config["output"], "primer3", "primers_genes_clusters.pdf"),
+        # Minimal set
+        os.path.join(config["output"], "minimal_set", "minimal_primers.csv"),
+        os.path.join(config["output"], "minimal_set", "minimal_sanke.pdf"),
+        os.path.join(config["output"], "minimal_set", "minimal_heatmap.pdf")
+
+
+# Cluster Alleles
+include: os.path.join(BASE_PATH,"rules","ClusterAlleles_traits.smk")        
+include: os.path.join(BASE_PATH,"rules","ClusterAlleles_scoring.smk")
+include: os.path.join(BASE_PATH,"rules","ClusterAlleles_summary.smk")
+include: os.path.join(BASE_PATH,"rules","ClusterAlleles_visual.smk")
+include: os.path.join(BASE_PATH,"rules","ClusterAlleles_group.smk")
+include: os.path.join(BASE_PATH,"rules","ClusterAlleles_fasta.smk")
+# Mafft
+include: os.path.join(BASE_PATH,"rules","mafft_msa_cmd.smk")
+include: os.path.join(BASE_PATH,"rules","mafft_msa_exec.smk")
+include: os.path.join(BASE_PATH,"rules","mafft_msa_target.smk")
+# Primer3
+include: os.path.join(BASE_PATH,"rules","primer3_cmd.smk")
+include: os.path.join(BASE_PATH,"rules","primer3_exec.smk")
+include: os.path.join(BASE_PATH,"rules","primer3_primers.smk")
+# Ipcress
+include: os.path.join(BASE_PATH,"rules","ipcress_cmd.smk")
+include: os.path.join(BASE_PATH,"rules","ipcress_exec.smk")
+include: os.path.join(BASE_PATH,"rules","ipcress_QC.smk")
+# Minimal set
+include: os.path.join(BASE_PATH,"rules","minimal_set.smk")

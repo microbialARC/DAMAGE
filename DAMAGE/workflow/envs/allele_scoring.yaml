@@ -1,0 +1,9 @@
+name: allele_scoring
+channels:
+ - bioconda
+ - conda-forge
+ - defaults
+dependencies:
+ - conda-forge::numpy
+ - conda-forge::matplotlib
+ - conda-forge::scipy

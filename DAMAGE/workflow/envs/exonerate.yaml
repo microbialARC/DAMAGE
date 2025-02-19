@@ -1,0 +1,7 @@
+name: exonerate
+channels:
+ - bioconda
+ - conda-forge
+ - defaults
+dependencies:
+ - bioconda::exonerate=2.4.0
